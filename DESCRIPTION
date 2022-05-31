@@ -1,7 +1,7 @@
 Package: phers
 Type: Package
 Title: Calculate Phenotype Risk Scores
-Version: 0.0.2
+Version: 0.0.3
 Authors@R: c(
   person('Jake', 'Hughey', , 'jakejhughey@gmail.com', c('aut', 'cre')),
   person('Layla', 'Aref', , 'larefnezhad@gmail.com', 'aut'))
@@ -15,15 +15,14 @@ LazyData: true
 RoxygenNote: 7.1.2
 Depends: R (>= 3.5)
 Imports: checkmate (>= 2.0.0), data.table (>= 1.5.0), foreach (>=
-        1.5.2), stats (>= 4.0.2), MASS (>= 7.3-55), iterators (>=
-        1.0.14), BEDMatrix (>= 2.0.3)
+        1.5.2), iterators (>= 1.0.14), BEDMatrix (>= 2.0.3)
 Suggests: doParallel (>= 1.0.17), knitr, rmarkdown, testthat (>=
-        3.1.0), ggplot2 (>= 3.3.5), qs (>= 0.25.2)
+        3.1.0), qs (>= 0.25.2)
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2022-05-06 17:23:36 UTC; joshuaschoenbachler
+Packaged: 2022-05-31 17:15:06 UTC; joshuaschoenbachler
 Author: Jake Hughey [aut, cre],
   Layla Aref [aut]
 Maintainer: Jake Hughey <jakejhughey@gmail.com>
 Repository: CRAN
-Date/Publication: 2022-05-10 09:10:06 UTC
+Date/Publication: 2022-05-31 22:20:05 UTC
