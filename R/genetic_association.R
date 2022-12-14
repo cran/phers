@@ -42,9 +42,9 @@
 #'   If `modelType` is "genotypic", the data.table will include separate
 #'   statistics for heterozygous and homozygous genotypes.
 #'
-#' @eval example3()
+#' @eval example4()
 #'
-#' @seealso [stats::lm()], [stats::confint()], [getScores()], [phers()]
+#' @seealso [stats::lm()], [stats::confint()], [getScores()]
 #'
 #' @export
 getGeneticAssociations = function(
@@ -77,23 +77,30 @@ getGeneticAssociations = function(
 
     snpNow = unique(diseaseVariantMap[disease_id == diseaseId]$variant_id)
     genoCount = apply(
-      genotypes[, snpNow, drop = FALSE], 2L, uniqueN, na.rm = TRUE)
+      genotypes[unique(lmInputSub$person_id), snpNow, drop = FALSE], 2L,
+      uniqueN, na.rm = TRUE)
     snpSub = snpNow[genoCount > 1]
 
-    genotypesSub = data.table(
-      person_id = rownames(genotypes), genotypes[, snpSub, drop = FALSE])
+    if (length(snpSub) == 0) {
+      statsSnps = data.table()}
 
-    statsSnps = foreach(snp = snpSub, .combine = rbind) %do% {
-      genotypesSub2 = genotypesSub[, c('person_id', snp), with = FALSE]
-      lmInputSub2 = merge(
-        lmInputSub, genotypesSub2, by = 'person_id')[, !'person_id']
-      setnames(lmInputSub2, snp, 'allele_count')
-      lmInputSub2 = lmInputSub2[!is.na(allele_count)]
+    else {
+      genotypesSub = data.table(
+        person_id = rownames(genotypes), genotypes[, snpSub, drop = FALSE])
+      statsSnps = foreach(snp = snpSub, .combine = rbind) %do% {
+        genotypesSub2 = genotypesSub[, c('person_id', snp), with = FALSE]
+        lmInputSub2 = merge(
+          lmInputSub, genotypesSub2, by = 'person_id')[, !'person_id']
+        setnames(lmInputSub2, snp, 'allele_count')
+        lmInputSub2 = lmInputSub2[!is.na(allele_count)]
 
-      lmStat = runLinear(
-        lmInputSub2, lmFormula, modelType, diseaseId, snp, level)}})
+        lmStat = runLinear(
+          lmInputSub2, lmFormula, modelType, diseaseId, snp, level)}}})
 
-  setkeyv(statsAll, c('disease_id', 'variant_id'))
+  if (nrow(statsAll) > 0) {
+    setkeyv(statsAll, c('disease_id', 'variant_id'))
+  }
+
   return(statsAll)}
 
 
@@ -138,7 +145,9 @@ runLinear = function(
     if (varName == 'allele_count1') {
       lmStat[, genotype := 'heterozygous']
     } else if (varName == 'allele_count2') {
-      lmStat[, genotype := 'homozygous']}}
+      lmStat[, genotype := 'homozygous']}
+
+    lmStat}
 
   stat = cbind(stat, lmStats)
   return(stat)}

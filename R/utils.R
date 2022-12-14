@@ -1,9 +1,40 @@
-checkDemos = function(demos) {
+#' @import checkmate
+#' @import data.table
+#' @importFrom speedglm speedglm
+#' @importFrom foreach foreach %do% %dopar%
+#' @importFrom stats lm confint update.formula rstandard binomial predict
+#' @importFrom iterators iter
+#' @importFrom BEDMatrix BEDMatrix
+#' @importFrom survival coxph
+# BEDMatrix importFrom only to avoid note on R CMD check
+NULL
+
+
+checkDemos = function(
+    demos, method = c(
+      'prevalence', 'logistic', 'cox', 'loglinear', 'prevalence_precalc')) {
+
+  method = match.arg(method)
   assertDataTable(demos)
+
+  cols = 'person_id'
+  colsExc = c('phecode', 'w', 'disease_id', 'score')
+
+  if (method == 'cox') {
+    cols = c(cols, 'first_age', 'last_age')
+    colsExc = c(colsExc, 'occurrence_age')}
+  else if (method == 'loglinear') {
+    colsExc = c(colsExc, 'num_occurrences')}
+
   assertNames(
-    colnames(demos), type = 'unique', must.include = 'person_id',
-    disjunct.from = c('phecode', 'w', 'disease_id', 'score'))
+    colnames(demos), type = 'unique', must.include = cols,
+    disjunct.from = colsExc)
+
   assert(anyDuplicated(demos$person_id) == 0)
+  if (method == 'cox') {
+    assertNumeric(demos$first_age, lower = 0)
+    assertNumeric(demos$last_age, lower = 0)}
+
   invisible()}
 
 
@@ -39,12 +70,26 @@ checkIcdOccurrences = function(
   invisible()}
 
 
-checkPhecodeOccurrences = function(phecodeOccurrences, demos) {
+checkPhecodeOccurrences = function(
+    phecodeOccurrences, demos,
+    method = c(
+      'prevalence', 'logistic', 'cox', 'loglinear', 'prevalence_precalc')) {
+
+  method = match.arg(method)
   assertDataTable(phecodeOccurrences)
+  cols = c('person_id', 'phecode')
+  cols = if (
+    method == 'cox') c(cols, 'occurrence_age') else if (
+      method == 'loglinear') c(cols, 'num_occurrences') else cols
+
   assertNames(
     colnames(phecodeOccurrences), type = 'unique',
-    must.include = c('person_id', 'phecode'),
-    disjunct.from = c('w', 'disease_id'))
+    must.include = cols, disjunct.from = c('w', 'disease_id'))
+
+  if (method == 'cox') {
+    assertNumeric(phecodeOccurrences$occurrence_age, lower = 0)
+  } else if (method == 'loglinear') {
+    assertNumeric(phecodeOccurrences$num_occurrences, lower = 0)}
 
   coll = makeAssertCollection()
   assertSubset(
@@ -57,12 +102,15 @@ checkPhecodeOccurrences = function(phecodeOccurrences, demos) {
 
 checkWeights = function(weights) {
   assertDataTable(weights)
+
   assertNames(
-    colnames(weights), type = 'unique', must.include = c('phecode', 'w'),
-    disjunct.from = c('person_id', 'disease_id'))
+    colnames(weights), type = 'unique',
+    must.include = c('person_id', 'phecode', 'w'),
+    disjunct.from = 'disease_id')
+  assert(anyDuplicated(weights, by = c('person_id', 'phecode')) == 0)
+
   assertCharacter(weights$phecode)
   assertNumeric(weights$w, finite = TRUE)
-  assert(anyDuplicated(weights$phecode) == 0)
   invisible()}
 
 
@@ -149,3 +197,15 @@ reportSubsetAssertions = function(x, choices, coll) {
     msg1 = paste0(vname(x), ' must be a subset of ', vname(choices))
     stop(msg1, call. = FALSE)}
   invisible(TRUE)}
+
+
+checkMethodFormula = function(methodFormula, demos) {
+  assertFormula(methodFormula)
+  assertNames(
+    all.vars(methodFormula), subset.of = colnames(demos),
+    disjunct.from = c('dx_status', 'person_id', 'phecode'))
+
+  if (all.vars(update.formula(methodFormula, . ~ 1)) != '.') {
+    stop('The formula contains a dependent variable, which is not allowed.')}
+
+  invisible()}

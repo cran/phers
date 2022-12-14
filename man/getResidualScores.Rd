@@ -34,7 +34,7 @@ library('data.table')
 # map ICD codes to phecodes
 phecodeOccurrences = getPhecodeOccurrences(icdSample)
 
-# calculate weights
+# calculate weights (using the prevalence method)
 weights = getWeights(demoSample, phecodeOccurrences)
 
 # OMIM disease IDs for which to calculate phenotype risk scores
@@ -44,12 +44,11 @@ diseaseId = 154700
 diseasePhecodeMap = mapDiseaseToPhecode()
 
 # calculate scores
-scores = getScores(
-  demoSample, phecodeOccurrences, weights, diseasePhecodeMap[disease_id == diseaseId])
+scores = getScores(weights, diseasePhecodeMap[disease_id == diseaseId])
 
 # calculate residual scores
 rscores = getResidualScores(demoSample, scores, lmFormula = ~ sex)
 }
 \seealso{
-\code{\link[stats:influence.measures]{stats::rstandard()}}, \code{\link[=getScores]{getScores()}}, \code{\link[=phers]{phers()}}
+\code{\link[stats:influence.measures]{stats::rstandard()}}, \code{\link[=getScores]{getScores()}}
 }

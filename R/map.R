@@ -32,7 +32,8 @@
 #' Pre-calculated weights for calculating phenotype risk scores
 #'
 #' The weights are based on EHR data from the Vanderbilt University Medical
-#' Center Synthetic Derivative (SD) and ICD-phecode map version 1.2.
+#' Center Synthetic Derivative (SD) and ICD-phecode map version 1.2 and are
+#' calculated using the "prevalence" method.
 #'
 #' @format A data.table with the following columns:
 #'
@@ -87,7 +88,7 @@
 #'
 #' This table provides a mapping between Human Phenotype Ontology (HPO)
 #' terms and phecodes, and is useful for using phecodes to represent the
-#' clinical features of Mendelian diseases.
+#' clinical features of Mendelian diseases (version 1.2).
 #'
 #' @format A data.table with the following columns:
 #'
@@ -137,7 +138,7 @@
 #'
 #' @eval example1()
 #'
-#' @seealso [getScores()], [phers()]
+#' @seealso [getScores()]
 #'
 #' @export
 mapDiseaseToPhecode = function(

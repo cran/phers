@@ -1,3 +1,9 @@
+# phers 1.0.0
+* Added methods to calculate weights based on logistic, log-linear, and Cox proportional hazards regression.
+
+# phers 0.0.4
+* Updated documentation with the version of `hpoPhecodeMap`.
+
 # phers 0.0.3
 * Set better key for residual scores table.
 * Switched to `lm()` instead of `glm()` for speed.
