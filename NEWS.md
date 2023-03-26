@@ -1,3 +1,9 @@
+# phers 1.0.2
+* Reduced size of example data.
+
+# phers 1.0.1
+* Replaced `speedglm()` with `glm()` due to compatibility issues with CRAN.
+
 # phers 1.0.0
 * Added methods to calculate weights based on logistic, log-linear, and Cox proportional hazards regression.
 
